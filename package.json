@@ -1,0 +1,57 @@
+{
+  "name": "oblio-mcp-server",
+  "version": "0.1.0",
+  "description": "Model Context Protocol server for Oblio.eu accounting — issue invoices, proformas & delivery notices, collect payments, submit e-Factura to the Romanian SPV, and query nomenclatures through natural language. Built on Oblio's official SDK.",
+  "type": "module",
+  "bin": {
+    "oblio-mcp-server": "dist/index.js"
+  },
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "build": "rm -rf dist && tsc && chmod +x dist/index.js",
+    "watch": "tsc --watch",
+    "test": "node --import tsx --test test/*.test.ts",
+    "typecheck": "tsc --noEmit",
+    "prepare": "npm run build",
+    "start": "node dist/index.js"
+  },
+  "keywords": [
+    "oblio",
+    "accounting",
+    "invoicing",
+    "factura",
+    "e-factura",
+    "romania",
+    "mcp",
+    "modelcontextprotocol",
+    "claude",
+    "typescript"
+  ],
+  "author": "Horatiu Vlad",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/horatiuvlad/oblio-mcp-server.git"
+  },
+  "homepage": "https://github.com/horatiuvlad/oblio-mcp-server#readme",
+  "bugs": "https://github.com/horatiuvlad/oblio-mcp-server/issues",
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.27.0",
+    "@obliosoftware/oblioapi": "^3.0.1",
+    "zod": "^3.25.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.13.0",
+    "tsx": "^4.19.0",
+    "typescript": "^5.9.0"
+  }
+}
