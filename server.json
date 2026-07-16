@@ -1,0 +1,47 @@
+{
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-07-09/server.json",
+  "name": "io.github.horatiuvlad/oblio-mcp-server",
+  "description": "MCP server for Oblio.eu accounting — invoices, proformas, delivery notices, payments, e-Factura/SPV and nomenclatures, built on Oblio's official SDK.",
+  "repository": {
+    "url": "https://github.com/horatiuvlad/oblio-mcp-server",
+    "source": "github"
+  },
+  "version": "1.0.0",
+  "packages": [
+    {
+      "registryType": "npm",
+      "registryBaseUrl": "https://registry.npmjs.org",
+      "identifier": "oblio-mcp-server",
+      "version": "1.0.0",
+      "transport": {
+        "type": "stdio"
+      },
+      "environmentVariables": [
+        {
+          "name": "OBLIO_API_EMAIL",
+          "description": "Oblio account email (Setari > Date Cont), used as the OAuth client id.",
+          "isRequired": true,
+          "isSecret": false
+        },
+        {
+          "name": "OBLIO_API_SECRET",
+          "description": "Oblio API secret (Setari > Date Cont), used as the OAuth client secret.",
+          "isRequired": true,
+          "isSecret": true
+        },
+        {
+          "name": "OBLIO_CIF",
+          "description": "Default company CIF (e.g. RO12345678). Optional; can be changed at runtime with set_cif.",
+          "isRequired": false,
+          "isSecret": false
+        },
+        {
+          "name": "OBLIO_TOKEN_FILE",
+          "description": "Optional path to persist the OAuth access token across restarts. Defaults to in-memory only.",
+          "isRequired": false,
+          "isSecret": false
+        }
+      ]
+    }
+  ]
+}

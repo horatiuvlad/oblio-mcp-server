@@ -1,5 +1,10 @@
 # oblio-mcp-server
 
+[![CI](https://github.com/horatiuvlad/oblio-mcp-server/actions/workflows/ci.yml/badge.svg)](https://github.com/horatiuvlad/oblio-mcp-server/actions/workflows/ci.yml)
+[![npm version](https://img.shields.io/npm/v/oblio-mcp-server.svg)](https://www.npmjs.com/package/oblio-mcp-server)
+[![node](https://img.shields.io/node/v/oblio-mcp-server.svg)](https://www.npmjs.com/package/oblio-mcp-server)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+
 A [Model Context Protocol](https://modelcontextprotocol.io) server for [Oblio.eu](https://www.oblio.eu) — issue invoices, proformas and delivery notices, collect payments, submit e-Factura to Romania's SPV, and query your account's reference data through natural language, from Claude Desktop or any MCP client.
 
 > Unofficial community project. Not affiliated with or endorsed by Oblio Software; it builds on their public API and official Node SDK.
