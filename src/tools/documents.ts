@@ -16,6 +16,31 @@ import {
   deleteDocumentShape,
 } from "../schemas.js";
 
+/**
+ * Turn list_documents tool args (minus `type`) into the flat query-parameter
+ * map the Oblio list endpoint expects. Undefined values are dropped and the
+ * nested `client` filter is flattened to PHP-style bracket keys
+ * (client[cif]=..., client[email]=...) — the SDK serialises params with
+ * URLSearchParams, which would otherwise stringify an object to
+ * "[object Object]".
+ */
+export function buildListFilters(
+  args: Record<string, unknown>
+): Record<string, unknown> {
+  const filters: Record<string, unknown> = {};
+  for (const [key, value] of Object.entries(args)) {
+    if (value === undefined || key === "type") continue;
+    if (key === "client" && typeof value === "object" && value !== null) {
+      for (const [ck, cv] of Object.entries(value as Record<string, unknown>)) {
+        if (cv !== undefined) filters[`client[${ck}]`] = cv;
+      }
+      continue;
+    }
+    filters[key] = value;
+  }
+  return filters;
+}
+
 export function registerDocumentTools(server: McpServer, cfg: OblioConfig): void {
   // ── create_document ────────────────────────────────────────────────────
   server.registerTool(
@@ -99,13 +124,7 @@ export function registerDocumentTools(server: McpServer, cfg: OblioConfig): void
     async (args) => {
       try {
         const api = getClient(cfg);
-        // Everything except `type` is an API-side filter; drop undefined keys.
-        const { type, ...rest } = args;
-        const filters: Record<string, unknown> = {};
-        for (const [key, value] of Object.entries(rest)) {
-          if (value !== undefined) filters[key] = value;
-        }
-        return ok(await api.list(type, filters));
+        return ok(await api.list(args.type, buildListFilters(args)));
       } catch (err) {
         return fail("listing documents", err);
       }

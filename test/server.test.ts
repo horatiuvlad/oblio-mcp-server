@@ -7,8 +7,14 @@ import assert from "node:assert/strict";
 
 import { loadConfig, ConfigError, type OblioConfig } from "../src/config.js";
 import { ok, fail } from "../src/result.js";
-import { withIdempotency, _clearIdempotency } from "../src/oblio.js";
+import {
+  withIdempotency,
+  _clearIdempotency,
+  InMemoryTokenHandler,
+} from "../src/oblio.js";
 import { createServer } from "../src/server.js";
+import { buildListFilters } from "../src/tools/documents.js";
+import { AccessToken } from "@obliosoftware/oblioapi";
 
 // ── loadConfig ─────────────────────────────────────────────────────────────
 
@@ -140,6 +146,67 @@ test("withIdempotency keeps distinct keys separate", async () => {
   assert.equal(calls, 2);
   assert.deepEqual(a, { calls: 1 });
   assert.deepEqual(b, { calls: 2 });
+});
+
+// ── buildListFilters ───────────────────────────────────────────────────────
+
+test("buildListFilters drops type and undefined values", () => {
+  const filters = buildListFilters({
+    type: "invoice",
+    seriesName: "FCT",
+    number: undefined,
+    draft: 0,
+  });
+  assert.deepEqual(filters, { seriesName: "FCT", draft: 0 });
+});
+
+test("buildListFilters flattens the client filter to bracket keys", () => {
+  const filters = buildListFilters({
+    type: "invoice",
+    client: { cif: "RO123", email: undefined, code: "C7" },
+    limitPerPage: 10,
+  });
+  assert.deepEqual(filters, {
+    "client[cif]": "RO123",
+    "client[code]": "C7",
+    limitPerPage: 10,
+  });
+});
+
+test("buildListFilters passes an empty client object through as nothing", () => {
+  const filters = buildListFilters({ type: "proforma", client: {} });
+  assert.deepEqual(filters, {});
+});
+
+// ── InMemoryTokenHandler ───────────────────────────────────────────────────
+
+test("InMemoryTokenHandler returns null when empty", () => {
+  const handler = new InMemoryTokenHandler();
+  assert.equal(handler.get(), null);
+});
+
+test("InMemoryTokenHandler round-trips an unexpired token", () => {
+  const handler = new InMemoryTokenHandler();
+  const token = new AccessToken({
+    request_time: Math.floor(Date.now() / 1000),
+    expires_in: 3600,
+    token_type: "Bearer",
+    access_token: "tok",
+  });
+  handler.set(token);
+  assert.equal(handler.get(), token);
+});
+
+test("InMemoryTokenHandler treats an expired token as a miss", () => {
+  const handler = new InMemoryTokenHandler();
+  const token = new AccessToken({
+    request_time: Math.floor(Date.now() / 1000) - 7200,
+    expires_in: 3600,
+    token_type: "Bearer",
+    access_token: "tok",
+  });
+  handler.set(token);
+  assert.equal(handler.get(), null);
 });
 
 // ── createServer ───────────────────────────────────────────────────────────

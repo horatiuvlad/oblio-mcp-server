@@ -142,20 +142,37 @@ export const getDocumentShape = {
   number: z.number().describe("Document number within the series."),
 };
 
+/** -1 = all, 0 = no, 1 = yes — Oblio's ternary list flags. */
+const ternaryFlag = z.union([z.literal(-1), z.literal(0), z.literal(1)]);
+
+/** Client sub-filter for list_documents, exactly the keys the API accepts. */
+export const listClientFilterSchema = z
+  .object({
+    cif: z.string().optional().describe("Client CIF."),
+    email: z.string().optional().describe("Client email."),
+    phone: z.string().optional().describe("Client phone."),
+    code: z.string().optional().describe("Internal client code."),
+  })
+  .describe("Filter by client identity (any combination of cif/email/phone/code).");
+
 export const listDocumentsShape = {
   type: docTypeSchema,
+  id: z.number().optional().describe("Filter by Oblio document id."),
   seriesName: z.string().optional().describe("Filter by series."),
   number: z.number().optional().describe("Filter by document number."),
-  draft: boolFlag.optional().describe("1 to list only drafts."),
-  canceled: boolFlag.optional().describe("1 to list only cancelled documents."),
-  client: clientSchema.partial().optional().describe("Filter by client fields (e.g. cif)."),
+  draft: ternaryFlag.optional().describe("Draft filter: -1 all, 0 issued only, 1 drafts only."),
+  canceled: ternaryFlag.optional().describe("Cancelled filter: -1 all, 0 active only, 1 cancelled only."),
+  collected: ternaryFlag.optional().describe("Payment filter: -1 all, 0 uncollected, 1 collected."),
+  client: listClientFilterSchema.optional(),
   issuedAfter: z.string().optional().describe("Issue date lower bound YYYY-MM-DD."),
   issuedBefore: z.string().optional().describe("Issue date upper bound YYYY-MM-DD."),
   withProducts: boolFlag.optional().describe("1 to include line items in the response."),
-  orderBy: z.string().optional().describe('Sort field, e.g. "issueDate".'),
+  withCollects: boolFlag.optional().describe("1 to include payment collections."),
+  withEinvoiceStatus: boolFlag.optional().describe("1 to include e-Factura (SPV) status."),
+  orderBy: z.enum(["id", "issueDate", "number"]).optional().describe("Sort field."),
   orderDir: z.enum(["ASC", "DESC"]).optional().describe("Sort direction."),
-  limitPerPage: z.number().max(100).optional().describe("Results per page (max 100)."),
-  offset: z.number().optional().describe("Pagination offset."),
+  limitPerPage: z.number().int().min(1).max(100).optional().describe("Results per page (max 100)."),
+  offset: z.number().int().min(0).optional().describe("Pagination offset."),
 };
 
 export const cancelDocumentShape = {

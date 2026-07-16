@@ -2,6 +2,8 @@
 
 A [Model Context Protocol](https://modelcontextprotocol.io) server for [Oblio.eu](https://www.oblio.eu) — issue invoices, proformas and delivery notices, collect payments, submit e-Factura to Romania's SPV, and query your account's reference data through natural language, from Claude Desktop or any MCP client.
 
+> Unofficial community project. Not affiliated with or endorsed by Oblio Software; it builds on their public API and official Node SDK.
+
 ## Features
 
 - **Built on Oblio's official SDK** ([`@obliosoftware/oblioapi`](https://www.npmjs.com/package/@obliosoftware/oblioapi)) — no hand-rolled HTTP layer for the core API
@@ -31,14 +33,14 @@ In Oblio, go to **Setari > Date Cont**. You need:
 
 ### Claude Desktop / MCP clients — via npx
 
-Add to your MCP client configuration (e.g. `claude_desktop_config.json`):
+Add to your MCP client configuration (e.g. `claude_desktop_config.json`). Straight from GitHub (npx builds it on first run):
 
 ```json
 {
   "mcpServers": {
     "oblio": {
       "command": "npx",
-      "args": ["-y", "oblio-mcp-server"],
+      "args": ["-y", "github:horatiuvlad/oblio-mcp-server"],
       "env": {
         "OBLIO_API_EMAIL": "you@example.com",
         "OBLIO_API_SECRET": "your-api-secret",
@@ -48,6 +50,8 @@ Add to your MCP client configuration (e.g. `claude_desktop_config.json`):
   }
 }
 ```
+
+Once the package is published to npm, `"args": ["-y", "oblio-mcp-server"]` will work as well.
 
 ### From a local build
 
@@ -91,7 +95,7 @@ npm run build
 | --- | --- |
 | `create_document` | Issue an invoice, proforma or delivery notice (aviz); supports an optional `idempotencyKey` to guard against double-issue on retries |
 | `get_document` | Fetch a single document by series name and number, with totals, status and a link |
-| `list_documents` | List documents with filters: series, number, client, issue-date range, draft/cancelled flags, sorting and pagination |
+| `list_documents` | List documents with filters: series, number, client (cif/email/phone/code), issue-date range, draft/cancelled/collected flags, optional line items / payments / SPV status, sorting and pagination |
 | `cancel_document` | Cancel (annul) a document; it stays in Oblio and can be restored later |
 | `restore_document` | Restore a previously cancelled document to its active state |
 | `delete_document` | Permanently delete a document (Oblio only allows deleting the last one in a series) |
