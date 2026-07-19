@@ -216,3 +216,44 @@ export const getEinvoiceShape = createEinvoiceShape;
 export const setCifShape = {
   cif: z.string().describe("Company CIF to use for subsequent requests, e.g. RO45079498."),
 };
+
+export const webhookTopicSchema = z
+  .enum([
+    "stock",
+    "Invoice/SaveDraft",
+    "Proforma/SaveDraft",
+    "Notice/SaveDraft",
+    "TaxReceipt/SaveDraft",
+    "Invoice/Update",
+    "Proforma/Update",
+    "Notice/Update",
+    "Invoice/Cancel",
+    "Proforma/Cancel",
+    "Notice/Cancel",
+    "TaxReceipt/Cancel",
+    "Collect/Inserted",
+  ])
+  .describe(
+    'Event to subscribe to: "stock" (stock changes), "<Doc>/SaveDraft" (draft ' +
+      'saved), "<Doc>/Update", "<Doc>/Cancel", or "Collect/Inserted" (payment ' +
+      "recorded), where <Doc> is Invoice, Proforma, Notice or TaxReceipt."
+  );
+
+export const createWebhookShape = {
+  topic: webhookTopicSchema,
+  endpoint: z
+    .string()
+    .url()
+    .describe(
+      "URL Oblio notifies on the subscribed event. It must respond with " +
+        'status 200 and echo the base64-encoded value of the "X-Oblio-Request-Id" ' +
+        "request header."
+    ),
+  cif: z.string().optional().describe("Company CIF. Falls back to the configured CIF."),
+};
+
+export const deleteWebhookShape = {
+  id: z
+    .union([z.string(), z.number()])
+    .describe("Webhook subscription id, as returned by create_webhook or list_webhooks."),
+};

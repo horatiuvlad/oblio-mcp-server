@@ -10,11 +10,12 @@ import { registerPaymentTools } from "./tools/payments.js";
 import { registerNomenclatureTools } from "./tools/nomenclatures.js";
 import { registerEinvoiceTools } from "./tools/einvoice.js";
 import { registerCompanyTools } from "./tools/company.js";
+import { registerWebhookTools } from "./tools/webhooks.js";
 
 export function createServer(cfg: OblioConfig): McpServer {
   const server = new McpServer({
     name: "oblio-mcp-server",
-    version: "0.1.0",
+    version: "1.1.0",
   });
 
   registerDocumentTools(server, cfg);
@@ -22,6 +23,7 @@ export function createServer(cfg: OblioConfig): McpServer {
   registerNomenclatureTools(server, cfg);
   registerEinvoiceTools(server, cfg);
   registerCompanyTools(server, cfg);
+  registerWebhookTools(server, cfg);
 
   return server;
 }

@@ -1,0 +1,15 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": ["config:recommended"],
+  "description": "Dependency tripwire: an @obliosoftware/oblioapi release usually means the Oblio API itself changed — review the SDK diff against src/schemas.ts before merging.",
+  "packageRules": [
+    {
+      "matchPackageNames": ["@obliosoftware/oblioapi"],
+      "labels": ["oblio-sdk-update"],
+      "prPriority": 10,
+      "prBodyNotes": [
+        "**Oblio shipped an SDK update — likely an API change.** Review the upstream diff (https://github.com/OblioSoftware/OblioApiJs) and check whether `src/schemas.ts` / the tool modules need updating. The weekly docs-drift workflow may open a companion PR."
+      ]
+    }
+  ]
+}

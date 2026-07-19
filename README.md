@@ -16,6 +16,7 @@ A [Model Context Protocol](https://modelcontextprotocol.io) server for [Oblio.eu
 - **Payments** — record collections (incasari) against invoices, with all Oblio payment methods
 - **e-Factura / SPV** — submit invoices to ANAF's SPV and poll their processing status
 - **Nomenclatures** — discover valid series names, VAT rates, saved clients, products, languages and management units before issuing documents
+- **Webhooks** — subscribe external endpoints to Oblio events (stock changes, document drafts/updates/cancellations, recorded payments)
 - **Multi-company** — switch the active company CIF at runtime via `set_cif`
 - **Client-side idempotency guard** — pass an `idempotencyKey` to `create_document` and retries won't double-issue a document
 - **Zod-validated inputs** — every tool input is schema-checked with descriptive field docs
@@ -124,6 +125,14 @@ npm run build
 | `create_einvoice` | Submit an issued invoice to Romania's SPV (e-Factura / ANAF) |
 | `get_einvoice` | Fetch the SPV status and archive for a submitted invoice (0 = processing, 1 = success, 2 = errors, -1 = not sent) |
 
+### Webhooks
+
+| Tool | Description |
+| --- | --- |
+| `create_webhook` | Subscribe an endpoint to an Oblio event: `stock`, `<Doc>/SaveDraft`, `<Doc>/Update`, `<Doc>/Cancel` (Doc = Invoice/Proforma/Notice/TaxReceipt) or `Collect/Inserted`. The endpoint must answer 200 and echo the base64 of the `X-Oblio-Request-Id` header |
+| `list_webhooks` | List all webhook subscriptions with topic, endpoint and id |
+| `delete_webhook` | Delete a webhook subscription by id |
+
 ### Company
 
 | Tool | Description |
@@ -144,6 +153,32 @@ npm run build
 npm run build      # compile to dist/
 npm test           # run the test suite
 npm run typecheck  # tsc --noEmit
+```
+
+### Keeping up with the Oblio API (docs drift)
+
+Oblio publishes no machine-readable API spec — the HTML docs at
+[oblio.eu/api](https://www.oblio.eu/api) are the de-facto contract that
+`src/schemas.ts` hand-encodes. Three layers guard against silent drift:
+
+1. **Docs snapshot** — `scripts/oblio-docs-snapshot.mjs` extracts the
+   contract-bearing parts of the docs page (endpoints, parameter tables,
+   response samples) into `docs/oblio-api.snapshot.md`. The
+   [`oblio-docs-drift` workflow](.github/workflows/oblio-docs-drift.yml)
+   re-fetches weekly and, on any change, opens a PR with the refreshed
+   snapshot and the diff.
+2. **Agent draft** — when the `ANTHROPIC_API_KEY` repo secret is configured,
+   the same workflow runs Claude Code on the drift PR branch to translate the
+   docs diff into real `src/schemas.ts` / tool changes (including
+   `.describe()` text), verified with typecheck + tests and pushed as a
+   commit on the PR. A human still reviews and merges; without the secret the
+   PR is opened with a manual checklist instead.
+3. **SDK tripwire** — [Renovate](renovate.json) flags releases of
+   `@obliosoftware/oblioapi`, which usually accompany API changes.
+
+```bash
+node scripts/oblio-docs-snapshot.mjs --check    # exit 3 + diff on drift
+node scripts/oblio-docs-snapshot.mjs --update   # refresh the snapshot
 ```
 
 ## License

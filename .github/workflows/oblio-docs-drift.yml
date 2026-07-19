@@ -1,0 +1,167 @@
+name: Oblio docs drift
+
+# Weekly drift alarm for the Oblio API contract. Oblio publishes no
+# machine-readable spec, so https://www.oblio.eu/api (HTML) is the source of
+# truth that src/schemas.ts hand-encodes. This workflow:
+#
+#   1. detect — re-fetches the docs and diffs them against the committed
+#      snapshot (docs/oblio-api.snapshot.md). On drift it opens/updates a PR
+#      on the `oblio-docs-drift` branch containing the refreshed snapshot.
+#   2. agent — on that same PR branch, runs Claude Code to translate the docs
+#      diff into real changes (src/schemas.ts fields/enums/describe() text,
+#      tools, README) and pushes the commit to the PR. Skipped gracefully when
+#      the ANTHROPIC_API_KEY secret is not configured.
+#
+# A human still reviews and merges the PR — the agent drafts, it never merges.
+# Exit codes from the script: 0 = no drift, 3 = drift, 2 = parse failure
+# (page redesign; the job fails loudly so the parser gets fixed).
+
+on:
+  schedule:
+    - cron: "17 6 * * 1" # Mondays 06:17 UTC
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  detect:
+    runs-on: ubuntu-latest
+    outputs:
+      drifted: ${{ steps.check.outputs.drifted }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Check docs against committed snapshot
+        id: check
+        run: |
+          set +e
+          node scripts/oblio-docs-snapshot.mjs --check | tee drift.txt
+          code=${PIPESTATUS[0]}
+          set -e
+          case "$code" in
+            0) echo "drifted=false" >> "$GITHUB_OUTPUT" ;;
+            3) echo "drifted=true"  >> "$GITHUB_OUTPUT" ;;
+            *) echo "::error::docs parse failure — oblio.eu/api may have been redesigned; fix scripts/oblio-docs-snapshot.mjs" ; exit "$code" ;;
+          esac
+
+      - name: Refresh snapshot
+        if: steps.check.outputs.drifted == 'true'
+        run: node scripts/oblio-docs-snapshot.mjs --update
+
+      - name: Compose PR body
+        if: steps.check.outputs.drifted == 'true'
+        run: |
+          {
+            echo "The Oblio API documentation (https://www.oblio.eu/api) changed since the last snapshot."
+            echo
+            echo "This PR refreshes \`docs/oblio-api.snapshot.md\`. **Review checklist:**"
+            echo
+            echo "- [ ] Map the doc changes into \`src/schemas.ts\` (fields, enums, \`.describe()\` text)"
+            echo "- [ ] Update affected tools under \`src/tools/\` and the README tool tables"
+            echo "- [ ] \`npm run typecheck && npm test\`"
+            echo
+            echo "If the Claude agent job ran, a follow-up commit on this branch already drafts those changes — review it rather than starting from scratch."
+            echo
+            echo "<details><summary>Docs diff</summary>"
+            echo
+            echo '```diff'
+            cat drift.txt
+            echo '```'
+            echo
+            echo "</details>"
+          } > pr-body.md
+
+      - name: Open or update drift PR
+        if: steps.check.outputs.drifted == 'true'
+        uses: peter-evans/create-pull-request@v7
+        with:
+          branch: oblio-docs-drift
+          title: "Oblio API docs changed — schema review needed"
+          commit-message: "docs: refresh Oblio API docs snapshot (drift detected)"
+          body-path: pr-body.md
+          labels: oblio-drift
+          add-paths: docs/oblio-api.snapshot.md
+
+  agent:
+    needs: detect
+    if: needs.detect.outputs.drifted == 'true'
+    runs-on: ubuntu-latest
+    env:
+      ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+    steps:
+      - name: Skip note (no ANTHROPIC_API_KEY secret)
+        if: env.ANTHROPIC_API_KEY == ''
+        run: echo "ANTHROPIC_API_KEY secret not configured — drift PR opened, schema update left to a human."
+
+      - uses: actions/checkout@v4
+        if: env.ANTHROPIC_API_KEY != ''
+        with:
+          ref: oblio-docs-drift
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        if: env.ANTHROPIC_API_KEY != ''
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        if: env.ANTHROPIC_API_KEY != ''
+        run: npm ci
+
+      - name: Draft schema updates with Claude
+        if: env.ANTHROPIC_API_KEY != ''
+        uses: anthropics/claude-code-action@v1
+        with:
+          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          prompt: |
+            You are on the `oblio-docs-drift` branch of oblio-mcp-server, an MCP
+            server for the Oblio.eu accounting API. The Oblio API docs changed;
+            `docs/oblio-api.snapshot.md` was refreshed on this branch. See the
+            exact contract change with:
+
+                git diff origin/main...HEAD -- docs/oblio-api.snapshot.md
+
+            Translate that docs change into real code changes:
+
+            1. Update `src/schemas.ts` — add/remove/retype fields, extend enums,
+               and write clear `.describe()` text for anything new. Follow the
+               file's existing conventions: `boolFlag` for 0/1 flags,
+               `ternaryFlag` for -1/0/1, nested object schemas exported for
+               reuse, concise English descriptions that help an LLM fill the
+               field correctly (mention Romanian terms in parentheses where the
+               docs use them).
+            2. If an endpoint was added/removed/changed, update the matching
+               tool module under `src/tools/` (and `src/server.ts` +
+               `test/server.test.ts` + the README tool tables) the same way the
+               existing tools are written: SDK call when
+               `@obliosoftware/oblioapi` covers it, `rawRequest` otherwise,
+               `ok`/`fail` result envelope, MCP annotations.
+            3. Purely cosmetic docs churn (wording, examples) that changes no
+               field, type, requiredness, enum value, or endpoint needs NO code
+               change — in that case change nothing and say so.
+            4. Verify with `npm run typecheck && npm test` and make sure both
+               pass before you finish.
+
+            Do NOT edit `docs/oblio-api.snapshot.md` (already refreshed) and do
+            not commit — the workflow commits for you.
+          claude_args: "--allowedTools 'Bash(npm:*),Bash(git diff:*),Bash(git log:*),Read,Glob,Grep,Edit,Write'"
+
+      - name: Commit agent changes to the drift PR
+        if: env.ANTHROPIC_API_KEY != ''
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          if git diff --cached --quiet; then
+            echo "Agent made no code changes (cosmetic docs churn)."
+          else
+            git commit -m "feat: update schemas for Oblio API docs drift (agent draft)"
+            git push origin HEAD:oblio-docs-drift
+          fi
