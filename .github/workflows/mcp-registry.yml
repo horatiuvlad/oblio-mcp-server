@@ -1,0 +1,34 @@
+name: MCP Registry
+
+# Publishes/updates the server listing in the official MCP registry
+# (registry.modelcontextprotocol.io) from server.json. Authenticates with
+# GitHub OIDC — the io.github.horatiuvlad/* namespace is proven by this repo's
+# identity, no long-lived secret needed. Run AFTER the npm package for the
+# version in server.json is live (the registry validates that the npm package
+# exists and its mcpName matches).
+
+on:
+  workflow_dispatch:
+  release:
+    types: [published]
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install mcp-publisher
+        run: |
+          curl -fsSL "https://github.com/modelcontextprotocol/registry/releases/latest/download/mcp-publisher_$(uname -s | tr '[:upper:]' '[:lower:]')_$(uname -m | sed 's/x86_64/amd64/;s/aarch64/arm64/').tar.gz" \
+            | tar xz mcp-publisher
+
+      - name: Login (GitHub OIDC)
+        run: ./mcp-publisher login github-oidc
+
+      - name: Publish to the MCP registry
+        run: ./mcp-publisher publish
