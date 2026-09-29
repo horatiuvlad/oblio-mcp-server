@@ -9,12 +9,15 @@
  *   - OBLIO_TOKEN_FILE  optional path; when set the OAuth access token is
  *                       persisted here so it survives process restarts
  *                       (defaults to in-memory only).
+ *   - OBLIO_BASE_URL    optional API origin (default https://www.oblio.eu);
+ *                       point it at a mock or sandbox for tests and evals.
  */
 export interface OblioConfig {
   email: string;
   secret: string;
   cif: string;
   tokenFile: string | undefined;
+  baseUrl: string | undefined;
 }
 
 export class ConfigError extends Error {}
@@ -33,5 +36,6 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): OblioConfig {
     secret,
     cif: (env.OBLIO_CIF ?? "").trim(),
     tokenFile: env.OBLIO_TOKEN_FILE?.trim() || undefined,
+    baseUrl: env.OBLIO_BASE_URL?.trim().replace(/\/+$/, "") || undefined,
   };
 }

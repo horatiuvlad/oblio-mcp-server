@@ -92,6 +92,7 @@ npm run build
 | `OBLIO_API_SECRET` | yes | Oblio API secret (Setari > Date Cont) |
 | `OBLIO_CIF` | no | Default company CIF; can be changed at runtime with `set_cif` |
 | `OBLIO_TOKEN_FILE` | no | Path where the OAuth access token is persisted so it survives restarts (defaults to in-memory only) |
+| `OBLIO_BASE_URL` | no | API origin, default `https://www.oblio.eu`. Point it at a mock or sandbox for tests and evals |
 
 ## Tools
 

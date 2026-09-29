@@ -49,11 +49,13 @@ test("loadConfig returns a config object when both are present", () => {
     OBLIO_API_SECRET: "s3cret",
     OBLIO_CIF: "RO123",
     OBLIO_TOKEN_FILE: "/tmp/tok.json",
+    OBLIO_BASE_URL: "http://127.0.0.1:8080/",
   } as NodeJS.ProcessEnv);
   assert.equal(cfg.email, "a@b.ro");
   assert.equal(cfg.secret, "s3cret");
   assert.equal(cfg.cif, "RO123");
   assert.equal(cfg.tokenFile, "/tmp/tok.json");
+  assert.equal(cfg.baseUrl, "http://127.0.0.1:8080");
 });
 
 test("loadConfig defaults cif to empty and tokenFile to undefined", () => {
@@ -63,6 +65,7 @@ test("loadConfig defaults cif to empty and tokenFile to undefined", () => {
   } as NodeJS.ProcessEnv);
   assert.equal(cfg.cif, "");
   assert.equal(cfg.tokenFile, undefined);
+  assert.equal(cfg.baseUrl, undefined);
 });
 
 // ── result helpers ─────────────────────────────────────────────────────────
@@ -217,6 +220,8 @@ test("createServer builds without throwing for a minimal valid cfg", () => {
     secret: "s3cret",
     cif: "",
     tokenFile: undefined,
+  baseUrl: undefined,
+    baseUrl: undefined,
   };
   const server = createServer(cfg);
   assert.ok(server);

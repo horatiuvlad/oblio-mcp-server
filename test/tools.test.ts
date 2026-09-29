@@ -31,6 +31,7 @@ const cfg: OblioConfig = {
   secret: "s3cret",
   cif: "RO123",
   tokenFile: undefined,
+  baseUrl: undefined,
 };
 
 /** All tools the server must expose, with their expected annotation posture. */

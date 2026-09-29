@@ -60,6 +60,7 @@ export function getClient(cfg: OblioConfig): OblioApi {
       cfg.secret,
       handler as unknown as AccessTokenHandlerFileStorage
     );
+    if (cfg.baseUrl) client._baseURL = cfg.baseUrl;
     if (cfg.cif) client.setCif(cfg.cif);
   }
   return client;
