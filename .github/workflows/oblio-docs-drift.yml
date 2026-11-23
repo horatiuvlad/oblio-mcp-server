@@ -48,7 +48,7 @@ jobs:
           case "$code" in
             0) echo "drifted=false" >> "$GITHUB_OUTPUT" ;;
             3) echo "drifted=true"  >> "$GITHUB_OUTPUT" ;;
-            *) echo "::error::docs parse failure — oblio.eu/api may have been redesigned; fix scripts/oblio-docs-snapshot.mjs" ; exit "$code" ;;
+            *) echo "::error::docs parse failure: oblio.eu/api may have been redesigned; fix scripts/oblio-docs-snapshot.mjs" ; exit "$code" ;;
           esac
 
       - name: Refresh snapshot
@@ -67,7 +67,7 @@ jobs:
             echo "- [ ] Update affected tools under \`src/tools/\` and the README tool tables"
             echo "- [ ] \`npm run typecheck && npm test\`"
             echo
-            echo "If the Claude agent job ran, a follow-up commit on this branch already drafts those changes — review it rather than starting from scratch."
+            echo "If the Claude agent job ran, a follow-up commit on this branch already drafts those changes. Review it rather than starting from scratch."
             echo
             echo "<details><summary>Docs diff</summary>"
             echo
@@ -83,7 +83,7 @@ jobs:
         uses: peter-evans/create-pull-request@v7
         with:
           branch: oblio-docs-drift
-          title: "Oblio API docs changed — schema review needed"
+          title: "Oblio API docs changed: schema review needed"
           commit-message: "docs: refresh Oblio API docs snapshot (drift detected)"
           body-path: pr-body.md
           labels: oblio-drift
@@ -98,7 +98,7 @@ jobs:
     steps:
       - name: Skip note (no ANTHROPIC_API_KEY secret)
         if: env.ANTHROPIC_API_KEY == ''
-        run: echo "ANTHROPIC_API_KEY secret not configured — drift PR opened, schema update left to a human."
+        run: echo "ANTHROPIC_API_KEY secret not configured, drift PR opened, schema update left to a human."
 
       - uses: actions/checkout@v4
         if: env.ANTHROPIC_API_KEY != ''

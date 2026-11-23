@@ -281,10 +281,10 @@ async function main() {
   }
 
   if (committed === snapshot) {
-    console.log("[docs-snapshot] no drift — docs match the committed snapshot");
+    console.log("[docs-snapshot] no drift, docs match the committed snapshot");
     return;
   }
-  console.log("[docs-snapshot] DRIFT DETECTED — oblio.eu/api differs from the snapshot:\n");
+  console.log("[docs-snapshot] DRIFT DETECTED: oblio.eu/api differs from the snapshot:\n");
   console.log(diffLines(committed, snapshot));
   process.exit(3);
 }
