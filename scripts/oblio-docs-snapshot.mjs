@@ -3,8 +3,8 @@
  * Oblio API docs drift detector.
  *
  * Oblio publishes no machine-readable spec (no OpenAPI/JSON Schema anywhere in
- * github.com/OblioSoftware); https://www.oblio.eu/api — human-readable HTML —
- * is the de-facto contract that src/schemas.ts hand-encodes. This script
+ * github.com/OblioSoftware). The human-readable HTML at https://www.oblio.eu/api
+ * is the contract that src/schemas.ts encodes by hand. This script
  * extracts the stable, contract-bearing parts of that page (endpoint URLs +
  * verbs, parameter tables with required markers, response samples) into a
  * deterministic markdown snapshot, so CI can detect when the contract moves.
@@ -12,7 +12,7 @@
  * Modes:
  *   --check   (default) fetch + parse + compare against the committed
  *             snapshot. Exit 0 = no drift, 3 = drift (diff on stdout),
- *             2 = parse failure (page redesign — the parser needs attention).
+ *             2 = parse failure (the page was redesigned and the parser needs attention).
  *   --update  fetch + parse + overwrite the committed snapshot.
  *   --from-file <path>  parse a local HTML file instead of fetching
  *             (offline tests / debugging).
@@ -29,7 +29,7 @@ const DOCS_URL = "https://www.oblio.eu/api";
 const repoRoot = join(dirname(fileURLToPath(import.meta.url)), "..");
 const SNAPSHOT_PATH = join(repoRoot, "docs", "oblio-api.snapshot.md");
 
-/** Section ids that must exist with at least one endpoint each — the core
+/** Section ids that must exist with at least one endpoint each: the core
  *  contract surface schemas.ts encodes. A miss means parse failure. */
 const REQUIRED_SECTIONS = [
   "authorize",
@@ -219,7 +219,7 @@ export function diffLines(a, b) {
   const B = b.split("\n");
   const n = A.length;
   const m = B.length;
-  // LCS table on prefixes (sizes here are a few hundred lines — fine).
+  // LCS table on prefixes (the inputs are a few hundred lines, so the quadratic table is cheap).
   const dp = Array.from({ length: n + 1 }, () => new Uint16Array(m + 1));
   for (let i = n - 1; i >= 0; i--)
     for (let j = m - 1; j >= 0; j--)

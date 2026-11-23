@@ -142,7 +142,7 @@ export const getDocumentShape = {
   number: z.number().describe("Document number within the series."),
 };
 
-/** -1 = all, 0 = no, 1 = yes — Oblio's ternary list flags. */
+/** -1 = all, 0 = no, 1 = yes. Oblio's ternary list flags. */
 const ternaryFlag = z.union([z.literal(-1), z.literal(0), z.literal(1)]);
 
 /** Client sub-filter for list_documents, exactly the keys the API accepts. */

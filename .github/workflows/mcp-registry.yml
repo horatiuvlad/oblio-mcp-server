@@ -2,8 +2,8 @@ name: MCP Registry
 
 # Publishes/updates the server listing in the official MCP registry
 # (registry.modelcontextprotocol.io) from server.json. Authenticates with
-# GitHub OIDC — the io.github.horatiuvlad/* namespace is proven by this repo's
-# identity, no long-lived secret needed. Run AFTER the npm package for the
+# GitHub OIDC: this repo's identity proves the io.github.horatiuvlad/*
+# namespace, so no long-lived secret is needed. Run AFTER the npm package for the
 # version in server.json is live (the registry validates that the npm package
 # exists and its mcpName matches).
 

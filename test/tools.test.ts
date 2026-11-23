@@ -260,7 +260,7 @@ test("webhookTopicSchema lists all 13 documented topics", () => {
     assert.equal(webhookTopicSchema.parse(t), t);
   }
   assert.throws(() => webhookTopicSchema.parse("Invoice/Delete"));
-  // TaxReceipt has no Update topic in the docs — must stay rejected.
+  // TaxReceipt has no Update topic in the docs, so it must stay rejected.
   assert.throws(() => webhookTopicSchema.parse("TaxReceipt/Update"));
 });
 

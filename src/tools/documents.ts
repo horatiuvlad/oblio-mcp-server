@@ -20,7 +20,7 @@ import {
  * Turn list_documents tool args (minus `type`) into the flat query-parameter
  * map the Oblio list endpoint expects. Undefined values are dropped and the
  * nested `client` filter is flattened to PHP-style bracket keys
- * (client[cif]=..., client[email]=...) — the SDK serialises params with
+ * (client[cif]=..., client[email]=...). The SDK serialises params with
  * URLSearchParams, which would otherwise stringify an object to
  * "[object Object]".
  */

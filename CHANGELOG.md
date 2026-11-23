@@ -8,8 +8,8 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Added
 
-- **Webhook tools** (closes the last coverage gap vs the documented API):
-  `create_webhook`, `list_webhooks`, `delete_webhook` — subscribe external
+- **Webhook tools** (closes the last coverage gap against the documented API):
+  `create_webhook`, `list_webhooks` and `delete_webhook` subscribe external
   endpoints to Oblio events (`stock`, `<Doc>/SaveDraft`, `<Doc>/Update`,
   `<Doc>/Cancel`, `Collect/Inserted`), via `rawRequest` (not covered by the
   typed SDK). 15 tools total.
@@ -17,9 +17,9 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   `scripts/oblio-docs-snapshot.mjs` snapshots the contract-bearing parts of
   https://www.oblio.eu/api (endpoints, parameter tables, response samples)
   into `docs/oblio-api.snapshot.md`; the weekly `oblio-docs-drift` workflow
-  re-fetches, opens a PR on drift, and — when the `ANTHROPIC_API_KEY` secret
-  is set — has Claude Code draft the matching `schemas.ts`/tool changes as a
-  commit on that PR (human reviews and merges).
+  re-fetches, opens a PR on drift and, when the `ANTHROPIC_API_KEY` secret is
+  set, has Claude Code draft the matching `schemas.ts` and tool changes as a
+  commit on that PR (a person reviews and merges).
 - **Renovate config** flagging `@obliosoftware/oblioapi` releases as a
   likely-API-change tripwire.
 - **Test suite expansion** (23 → 51 tests): full-surface MCP integration
@@ -47,12 +47,12 @@ Initial release.
   - Nomenclatures: `get_nomenclatures`
   - e-Factura / SPV: `create_einvoice`, `get_einvoice`
   - Company: `set_cif`, `get_cif`
-- **Client-side idempotency guard** — an optional `idempotencyKey` on
+- **Client-side idempotency guard**: an optional `idempotencyKey` on
   `create_document` prevents accidental double-issue on retries (Oblio has no
   draft state, so a create always mints a real numbered document).
 - **Zod-validated inputs** with descriptive field docs, and **MCP tool
   annotations** (read-only / destructive / idempotent hints) on every tool.
-- **Configurable OAuth token cache** — in-memory by default; set
+- **Configurable OAuth token cache**: in-memory by default; set
   `OBLIO_TOKEN_FILE` to persist across restarts.
 - Full document list filter set, including `client[...]` bracket filters,
   date ranges, and pagination.

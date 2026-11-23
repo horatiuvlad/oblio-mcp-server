@@ -4,8 +4,8 @@
  * Responsibilities:
  *   - construct/cache a single OblioApi client from config
  *   - default to an in-process token cache (the SDK's own default would write
- *     the OAuth token inside node_modules — wrong for npx / read-only
- *     installs); persist to disk only when OBLIO_TOKEN_FILE is set
+ *     the OAuth token inside node_modules, which fails for npx and
+ *     read-only installs); persist to disk only when OBLIO_TOKEN_FILE is set
  *   - expose the SDK's low-level HTTP client for endpoints the typed SDK
  *     does not cover (e-Factura / SPV), with per-verb payload wrapping that
  *     matches the SDK's HttpClient exactly (GET reads `data.params`,
@@ -66,7 +66,7 @@ export function getClient(cfg: OblioConfig): OblioApi {
   return client;
 }
 
-/** Reset the cached client — used by tests. */
+/** Reset the cached client. Tests use this to start from a clean state. */
 export function _resetClient(): void {
   client = null;
 }

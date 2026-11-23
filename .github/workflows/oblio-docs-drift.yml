@@ -4,15 +4,16 @@ name: Oblio docs drift
 # machine-readable spec, so https://www.oblio.eu/api (HTML) is the source of
 # truth that src/schemas.ts hand-encodes. This workflow:
 #
-#   1. detect — re-fetches the docs and diffs them against the committed
+#   1. detect: re-fetches the docs and diffs them against the committed
 #      snapshot (docs/oblio-api.snapshot.md). On drift it opens/updates a PR
 #      on the `oblio-docs-drift` branch containing the refreshed snapshot.
-#   2. agent — on that same PR branch, runs Claude Code to translate the docs
-#      diff into real changes (src/schemas.ts fields/enums/describe() text,
-#      tools, README) and pushes the commit to the PR. Skipped gracefully when
-#      the ANTHROPIC_API_KEY secret is not configured.
+#   2. agent: on that same PR branch, runs Claude Code (anthropics/claude-code-action)
+#      to turn the docs diff into code changes (src/schemas.ts fields, enums and
+#      describe() text, tools, README) and pushes the commit to the PR. The job
+#      only does this when the ANTHROPIC_API_KEY secret is set; otherwise it
+#      skips with a log line.
 #
-# A human still reviews and merges the PR — the agent drafts, it never merges.
+# A person reviews and merges the PR. The job drafts changes and never merges.
 # Exit codes from the script: 0 = no drift, 3 = drift, 2 = parse failure
 # (page redesign; the job fails loudly so the parser gets fixed).
 
