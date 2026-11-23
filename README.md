@@ -1,11 +1,11 @@
 # oblio-mcp-server
 
 [![CI](https://github.com/horatiuvlad/oblio-mcp-server/actions/workflows/ci.yml/badge.svg)](https://github.com/horatiuvlad/oblio-mcp-server/actions/workflows/ci.yml)
-[![npm version](https://img.shields.io/npm/v/oblio-mcp-server.svg)](https://www.npmjs.com/package/oblio-mcp-server)
-[![node](https://img.shields.io/node/v/oblio-mcp-server.svg)](https://www.npmjs.com/package/oblio-mcp-server)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
 A [Model Context Protocol](https://modelcontextprotocol.io) server for [Oblio.eu](https://www.oblio.eu). It lets Claude Desktop or any other MCP client issue invoices, proformas and delivery notices, collect payments, submit e-Factura to Romania's SPV, and look up your account's reference data in plain language.
+
+> **A newer server exists.** The [Oblio server in foreverworks/mcps](https://github.com/foreverworks/mcps/tree/main/servers/oblio) is this project's successor. It is on npm, has your client ask you before anything that makes or changes a fiscal document, and is where new features go. This one gets no new features. It still covers delivery notices, webhooks and e-Factura submission, which the successor does not have, so stay here if you need those.
 
 > Unofficial community project. Not affiliated with or endorsed by Oblio Software; it builds on their public API and official Node SDK.
 
@@ -166,7 +166,7 @@ npm run build
 
 - It sits on Oblio's **official SDK**
 - It ships with a **test suite** and strict typechecking
-- `create_document` has a **client-side idempotency guard**, so agent retries don't silently issue duplicate invoices
+- `create_document` has a **client-side idempotency guard**, so a retry does not silently issue a duplicate invoice
 - **Full e-Factura / SPV coverage**: submit and track invoices with ANAF, not just issue them locally
 
 ## When something goes wrong
