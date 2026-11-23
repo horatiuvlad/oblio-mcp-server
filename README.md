@@ -37,9 +37,30 @@ In Oblio, go to **Setari > Date Cont**. You need:
 
 ## Installation
 
+### Check that it starts
+
+Before you wire up a client, run the server once with dummy values. No Oblio account is needed for this, and nothing is sent to Oblio:
+
+```bash
+OBLIO_API_EMAIL=you@example.com OBLIO_API_SECRET=dummy npx -y github:horatiuvlad/oblio-mcp-server
+```
+
+npx downloads and builds the server on first run. It then prints this on stderr and waits for an MCP client on stdin (press Ctrl+C to stop):
+
+```
+[oblio-mcp-server] ready (stdio)
+```
+
+Once a client is connected, its tool list shows 15 tools.
+
 ### Claude Desktop and other MCP clients, via npx
 
-Add to your MCP client configuration (e.g. `claude_desktop_config.json`). Straight from GitHub (npx downloads and builds it on first run):
+Add the server to your MCP client configuration. In Claude Desktop that is `claude_desktop_config.json` (Settings > Developer > Edit Config opens it):
+
+- macOS: `~/Library/Application Support/Claude/claude_desktop_config.json`
+- Windows: `%APPDATA%\Claude\claude_desktop_config.json`
+
+Restart the client after you save the file; it reads the configuration only at start-up. This version runs straight from GitHub:
 
 ```json
 {
@@ -143,14 +164,14 @@ npm run build
 
 ## Why another Oblio MCP?
 
-- It sits on Oblio's **official SDK** rather than reimplementing the API surface
+- It sits on Oblio's **official SDK**
 - It ships with a **test suite** and strict typechecking
 - `create_document` has a **client-side idempotency guard**, so agent retries don't silently issue duplicate invoices
 - **Full e-Factura / SPV coverage**: submit and track invoices with ANAF, not just issue them locally
 
 ## When something goes wrong
 
-- `OBLIO_API_EMAIL and OBLIO_API_SECRET environment variables must be set`: the server printed this and exited because one of the two is missing or empty. Set both in the `env` block of your MCP client configuration.
+- `[oblio-mcp-server] OBLIO_API_EMAIL and OBLIO_API_SECRET environment variables must be set (get them from Oblio → Setari > Date Cont).` followed by exit code 1: one of the two is missing or empty. Set both in the `env` block of your MCP client configuration.
 - `[oblio-mcp-server] ready (stdio)` on stderr is the normal start-up line; the server then waits for an MCP client on stdin.
 - Questions and bug reports: [GitHub issues](https://github.com/horatiuvlad/oblio-mcp-server/issues).
 
