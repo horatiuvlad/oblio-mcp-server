@@ -299,6 +299,7 @@ Response sample:
 | sendEmail | Daca are valoarea 1 se va trimite email-ul de la Setari > E-mail-uri alarma > Document prin email |
 | orderNumber | Numar comanda (BT-13) |
 | contractNumber | Numar contract (BT-12) |
+| contractNumberDate | Data contract (BT-12) |
 | receptionNotice | Referinta proiectului (BT-11) |
 | projectNumber | Identificator cumparator (BT-46) |
 | buyerIdentifier | Numar aviz receptie (BT-15) |
