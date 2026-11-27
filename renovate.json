@@ -1,10 +1,12 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
-  "extends": ["config:recommended"],
+  "extends": ["github>foreverworks/renovate-config"],
   "description": "Dependency tripwire: an @obliosoftware/oblioapi release usually means the Oblio API itself changed. Review the SDK diff against src/schemas.ts before merging.",
   "packageRules": [
     {
+      "description": "Never merges on its own, whatever the shared preset says: a new SDK release usually means the Oblio API changed, so a person reviews the SDK diff against src/schemas.ts first.",
       "matchPackageNames": ["@obliosoftware/oblioapi"],
+      "automerge": false,
       "labels": ["oblio-sdk-update"],
       "prPriority": 10,
       "prBodyNotes": [
